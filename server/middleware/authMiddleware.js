@@ -21,4 +21,14 @@ next();
   catch(error){
     return res.status(401).json({message:"not authorized"})
   }
+};
+export const adminOnly=(req,res,next)=>{
+if(req.user.role==="admin"){
+  next();
+}else{
+  
+  return res.status(403).json({ message: "Access denied, admin only" });
+403
+
+}
 }
