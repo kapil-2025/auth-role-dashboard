@@ -6,8 +6,7 @@ import Admin from './pages/Admin.jsx';
 function App() {
   return (
     <div>
-      <h1 className='text-3xl font-bold text-blue-600'>Auth dashboard</h1>
-      <p className=' text-gray-500'>Login to continue</p>
+      
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />}></Route>
         <Route path="/login" element={<Login></Login>}></Route>
