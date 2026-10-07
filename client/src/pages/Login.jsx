@@ -47,7 +47,7 @@ function Login() {
           <Link
             to="/register"
             className="font-medium text-blue-600 hover:underline"
-          >Register</Link>
+          >Register Now</Link>
         </p>
       </form>
     </div>
