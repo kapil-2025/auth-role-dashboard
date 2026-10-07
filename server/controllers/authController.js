@@ -4,10 +4,16 @@ import User from "../models/User.js";
 const generateToken=(id,role)=>{return jwt.sign({id,role},process.env.JWT_SECRET,{expiresIn:"7d"});
 
 }
-export const registerUser=async (req,res)=>{
+export const registerUser=async (req,res)=>{try{
 const {name,email,password}=req.body;
-if(!name || !email || !password){
+if(typeof name !== "string" || typeof email !== "string" || typeof password !== "string"){
+  return res.status(400).json({message:"Name, email and password must be text"});
+}
+if(!name || !name.trim() || !email || !password){
   return res.status(400).json({message:"Name, email and password are required"});
+}
+if(password.length<6){
+  return res.status(400).json({message:"password must be more than 6 letters"})
 }
 const userExists= await User.findOne({email});
 if(userExists){
@@ -17,11 +23,18 @@ if(userExists){
   const user= await User.create({name:name,email,password:hashedPassword});
   res.status(201).json({_id:user._id,name:user.name,email:user.email,role:user.role,});
  
+}catch(error){
+  console.error(error.message);
+  res.status(500).json({message:"Server errror"});
 }
+};
 
-;
-export const loginUser=async(req,res)=>{
+
+export const loginUser=async(req,res)=>{try{
 const {email,password}=req.body;
+if(typeof email !== "string" || typeof password !== "string"){
+  return res.status(400).json({message:"Email and password must be text"});
+}
 if(!email || !password){
   return res.status(400).json({message:"Email and password are required"});
 }
@@ -32,6 +45,10 @@ if(!user){
   if(!isMatch){
     return res.status(401).json({message:"invalid email or password"});
   }
-  res.status(200).json({_id:user._id,name:user.name,email:user.email,role:user.role,token:generateToken(user._id,user.role)});
+  res.status(200).json({_id:user._id,name:user.name,email:user.email,role:user.role,token:generateToken(user._id,user.role)});}
+  catch(error){
+    console.error(error.message);
+    return res.status(500).json({message:"Server error"})
+  }
 }
 
