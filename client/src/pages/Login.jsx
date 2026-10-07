@@ -1,12 +1,40 @@
-import { Link } from "react-router";
+import { Link,useNavigate } from "react-router";
+import {useState} from 'react'
 function Login() {
+  const [email,setEmail]=useState("");
+  const [password,setPassword]=useState("");
+  const [error,setError]=useState("");
+  const navigate=useNavigate();
+  const handleSubmit=async (e)=>{
+e.preventDefault();
+const res=await fetch("http://localhost:5000/api/auth/login",{
+  method:"POST",headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({email,password}),
+  });
+  const data=await res.json();
+if(!res.ok){
+  setError(data.message);
+  return;
+}
+  localStorage.setItem("token",data.token);
+  localStorage.setItem("user",JSON.stringify({name:data.name,email:data.email,role:data.role}));
+if(data.role==="admin"){
+  navigate("/admin");
+}else{
+  navigate("/dashboard");
+}
+
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form className="w-full max-w-sm bg-white p-8 rounded-xl shadow-md">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-2xl font-bold text-gray-800">Login</h1>
+        
+        {/* <p>{email}</p> */}
         <p className="mt=1 mb-6 text-sm text-gray-500">
           Welcome back! Please login to continue
         </p>
+        {error && <p className="mb-4 text-l text-red-600">{error}</p>}
         <div className="mb-4">
           <label
             htmlFor="email"
@@ -18,6 +46,8 @@ function Login() {
             type="email"
             id="email"
             placeholder="you@example.com"
+            value={email}
+            onChange={(e)=>{setEmail(e.target.value)}}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />{" "}
         </div>
@@ -33,6 +63,8 @@ function Login() {
             type="password"
             id="password"
             placeholder="Enter your password"
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
