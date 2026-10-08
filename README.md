@@ -1,23 +1,48 @@
 # Auth + Role-Based Dashboard
 
-I built this project to understand how login systems actually work in a MERN app: how passwords are stored safely, how JWT tokens work, and how admins get access that normal users don't.
+This is my first full-stack project. I wanted to learn how login, JWT and admin roles actually work, so I built it step by step and deployed it.
 
-**Live API:** https://auth-role-dashboard.onrender.com
+Users can register, log in and see their dashboard. Admins also get an admin panel where they can see all users and delete them.
 
-(It's on Render's free plan, so the first request after some idle time can take around a minute to wake up.)
+**Live app:** https://auth-role-dashboard.vercel.app
+**Backend API:** https://auth-role-dashboard.onrender.com
 
-## What it does
+Note: the backend is on Render's free plan, so the first request can take 30-60 seconds to wake up.
 
-- Users can register and log in
-- Passwords are hashed with bcrypt before saving, never stored as plain text
-- On login, the server returns a JWT token (valid for 7 days)
-- Protected routes need this token, otherwise they return 401
-- Admin-only routes check the role from the database, so a normal user gets 403
-- Admin can see all users and delete a user
+## Screenshots
 
-## Tech used
+| Login | User Dashboard | Admin Panel |
+|---|---|---|
+| ![Login](screenshots/login.png) | ![Dashboard](screenshots/dashboard.png) | ![Admin](screenshots/admin.png) |
 
-Node.js, Express, MongoDB Atlas (Mongoose), JWT, bcryptjs. Deployed on Render. Frontend will be in React (working on it now).
+## Features
+
+- Register and login
+- Passwords are hashed with bcrypt (not saved as plain text)
+- JWT token after login (valid for 7 days)
+- User dashboard with name, email and role
+- Admin panel with all users in a table
+- Admin can delete users (it asks for confirmation first)
+- Admin can't delete his own account (checked on both frontend and backend)
+- Protected pages: without login you go back to /login, and normal users can't open /admin
+- Backend checks the token and the role from the database on every protected route
+- Validation for empty fields, wrong data types, short passwords and invalid MongoDB ids
+- Email is trimmed and lowercased, so one email can't make two accounts
+
+## Tech stack
+
+- **Frontend:** React (Vite), React Router, Tailwind CSS
+- **Backend:** Node.js, Express, JWT, bcryptjs
+- **Database:** MongoDB Atlas with Mongoose
+- **Deployed on:** Vercel (frontend) and Render (backend)
+
+## How login works
+
+1. User enters email and password, and React sends them to the backend
+2. Backend checks the password with bcrypt and sends back a JWT token
+3. React saves the token in localStorage and opens the dashboard (or the admin panel for admins)
+4. For protected APIs, React sends the token in the `Authorization: Bearer <token>` header
+5. Backend middleware checks the token and the role, then sends the data
 
 ## API routes
 
@@ -30,31 +55,24 @@ Node.js, Express, MongoDB Atlas (Mongoose), JWT, bcryptjs. Deployed on Render. F
 | GET | /api/auth/users | Admin |
 | DELETE | /api/auth/users/:id | Admin |
 
-For protected routes, send the token like this: `Authorization: Bearer <token>`
+## Folder structure
 
-## Things I handled
-
-- Missing fields, fields with only spaces, or wrong types (like a number instead of text) return 400
-- Password shorter than 6 characters returns 400
-- Email is trimmed and lowercased, so "Kapil@Gmail.com" and "kapil@gmail.com" don't become two accounts
-- An invalid MongoDB id returns 400 instead of a server error
-- Every controller has try/catch, so unexpected errors return a clean JSON message and the real error only shows in the server logs
-
-## Problems I ran into
-
-- My ISP's DNS couldn't resolve the `mongodb+srv://` connection string, so I switched to the standard `mongodb://` format
-- I once forgot `await` before `findOne`, got a Promise instead of the user, and the duplicate email check always passed
-- `minlength: 6` in the schema didn't work for passwords because it was checking the hashed password (always 60 characters), so I moved the length check to the controller
+```
+auth-role-dashboard/
+├── server/   Express API (routes, controllers, middleware, models)
+└── client/   React app (pages, components)
+```
 
 ## Run it locally
 
+**Backend**
+
 ```
-git clone https://github.com/kapil-2025/auth-role-dashboard.git
-cd auth-role-dashboard/server
+cd server
 npm install
 ```
 
-Create a `.env` file inside the `server` folder:
+Create `server/.env`:
 
 ```
 PORT=5000
@@ -62,12 +80,52 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 ```
 
-Then run:
-
 ```
 npm start
 ```
 
+**Frontend** (in a new terminal)
+
+```
+cd client
+npm install
+```
+
+Create `client/.env`:
+
+```
+VITE_API_URL=http://localhost:5000
+```
+
+```
+npm run dev
+```
+
+## Problems I faced
+
+**Backend**
+- My ISP's DNS couldn't resolve the `mongodb+srv://` connection string, so I used the normal `mongodb://` format instead
+- I forgot `await` before `findOne` once. I got a Promise instead of the user, so the "user already exists" check never worked
+- `minlength: 6` in the schema didn't work for passwords, because it was checking the hashed password (always 60 characters). I moved the check to the controller
+
+**Frontend**
+- After deploying, refreshing `/dashboard` gave a 404, because a single page app only has `index.html`. I fixed it with a rewrite in `vercel.json`
+- The backend URL was hardcoded as `localhost` in four places, which breaks after deploying. I moved it to a `VITE_API_URL` environment variable
+- With a wrong token, the admin page crashed (`users.map is not a function`) because the error was saved as the user list. Now it checks `res.ok` first
+- A missing `/` in `<Navigate to="login">` sent users to `/admin/login` instead of `/login`
+
+## What I learned
+
+- Frontend checks are only for user experience. The real security has to be in the backend, because anyone can call the API directly from Postman.
+- Something that works on localhost can still break after deploying (refresh 404, localhost URL), so I need to test the live version properly.
+- Reading the error carefully (401 vs 404 vs "Failed to fetch") tells me where the problem is much faster than guessing.
+
+## What I want to add next
+
+- Change a user's role from the admin panel
+- Loading spinners while waiting for the API
+- httpOnly cookies or refresh tokens instead of keeping the token in localStorage
+
 ## Status
 
-Backend is done and deployed. Working on the React frontend next.
+Done and deployed ✅
