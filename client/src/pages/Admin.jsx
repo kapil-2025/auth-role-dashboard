@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Navbar from "../components/Navbar.jsx";
 
 function Admin() {
   const [users, setUsers] = useState([]);
@@ -27,8 +28,8 @@ function Admin() {
     const data = await res.json();
   };
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md">
+    <div className="min-h-screen bg-gray-100 ">
+     <Navbar></Navbar> <div className="max-w-4xl mx-auto mt-8 bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Total users:{users.length}</p>
         <table className="w-full mt-6 text-left text-sm">
@@ -49,7 +50,7 @@ function Admin() {
                 <td className="py-3">{user.role} </td>{" "}
                <td className="py-3">
   {user.email === currentUser?.email ? (
-    <span className="text-xs rounded-xl text-gray-700">You</span>
+    <span className="text-xs rounded-xl text-blue-700">You</span>
   ) : (
     <button
       onClick={() => handleDelete(user._id)}
