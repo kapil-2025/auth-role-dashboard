@@ -36,7 +36,7 @@ if(!res.ok){
     <div className="min-h-screen bg-gray-100 ">
      <Navbar></Navbar> <div className="max-w-4xl mx-auto mt-8 bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
-        <p className="mt-1 text-`http://localhost:5000/api/auth/users/${id}`sm text-gray-500">Total users:{users.length}</p>
+        <p className="mt-1 text-`http://localhost:5000/api/auth/users/${id}`sm text-gray-500">Total users: {users.length}</p>
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
         <table className="w-full mt-6 text-left text-sm">
           <thead>

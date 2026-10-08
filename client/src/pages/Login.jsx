@@ -75,7 +75,7 @@ if(data.role==="admin"){
           Login
         </button>
         <p className="mt-4 text-center text-sm text-gray-600">
-          No account?
+          No account? 
           <Link
             to="/register"
             className="font-medium text-blue-600 hover:underline"
