@@ -3,7 +3,9 @@ import Navbar from "../components/Navbar.jsx";
 
 function Admin() {
   const [users, setUsers] = useState([]);
+  const [error,setError]=useState("");
   const currentUser = JSON.parse(localStorage.getItem("user"));
+  
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
@@ -11,7 +13,10 @@ function Admin() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-
+if(!res.ok){
+  setError(data.message);
+  return;
+}
       setUsers(data);
     };
     fetchUsers();
@@ -32,6 +37,7 @@ function Admin() {
      <Navbar></Navbar> <div className="max-w-4xl mx-auto mt-8 bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Total users:{users.length}</p>
+        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
         <table className="w-full mt-6 text-left text-sm">
           <thead>
             <tr className="border-b text-gray-500">
