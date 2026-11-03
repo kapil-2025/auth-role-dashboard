@@ -1,29 +1,38 @@
 import { Link,useNavigate } from "react-router";
 import {useState} from 'react'
+import ServerStatus from "../components/ServerStatus";
 function Login() {
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
   const navigate=useNavigate();
   const handleSubmit=async (e)=>{
-e.preventDefault();
-const res=await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`,{
-  method:"POST",headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({email,password}),
-  });
-  const data=await res.json();
-if(!res.ok){
-  setError(data.message);
-  return;
-}
-  localStorage.setItem("token",data.token);
-  localStorage.setItem("user",JSON.stringify({name:data.name,email:data.email,role:data.role}));
-if(data.role==="admin"){
-  navigate("/admin");
-}else{
-  navigate("/dashboard");
-}
-
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try{
+      const res=await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email,password}),
+      });
+      const data=await res.json();
+      if(!res.ok){
+        setError(data.message);
+        return;
+      }
+      localStorage.setItem("token",data.token);
+      localStorage.setItem("user",JSON.stringify({name:data.name,email:data.email,role:data.role}));
+      if(data.role==="admin"){
+        navigate("/admin");
+      }else{
+        navigate("/dashboard");
+      }
+    }catch{
+      setError("Could not reach the server. Please try again in a moment.");
+    }finally{
+      setLoading(false);
+    }
   }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -31,10 +40,11 @@ if(data.role==="admin"){
         <h1 className="text-2xl font-bold text-gray-800">Login</h1>
         
         {/* <p>{email}</p> */}
-        <p className="mt=1 mb-6 text-sm text-gray-500">
+        <p className="mt-1 mb-4 text-sm text-gray-500">
           Welcome back! Please login to continue
         </p>
-        {error && <p className="mb-4 text-l text-red-600">{error}</p>}
+        <ServerStatus />
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
         <div className="mb-4">
           <label
             htmlFor="email"
@@ -70,9 +80,10 @@ if(data.role==="admin"){
         </div>
         <button
           type="submit"
-          className="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+          disabled={loading}
+          className="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
         <p className="mt-4 text-center text-sm text-gray-600">
           No account? 
