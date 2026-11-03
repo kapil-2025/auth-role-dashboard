@@ -28,6 +28,7 @@ Note: the backend is on Render's free plan, so the first request can take 30-60 
 - Backend checks the token and the role from the database on every protected route
 - Validation for empty fields, wrong data types, short passwords and invalid MongoDB ids
 - Email is trimmed and lowercased, so one email can't make two accounts
+- Login and register pages show a "waking up the server" status and a loading button, because the free Render backend sleeps when idle
 
 ## Tech stack
 
@@ -123,7 +124,6 @@ npm run dev
 ## What I want to add next
 
 - Change a user's role from the admin panel
-- Loading spinners while waiting for the API
 - httpOnly cookies or refresh tokens instead of keeping the token in localStorage
 
 ## Status

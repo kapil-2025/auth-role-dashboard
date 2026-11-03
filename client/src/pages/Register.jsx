@@ -1,24 +1,33 @@
 import { Link,useNavigate } from "react-router";
 import {useState} from 'react'
+import ServerStatus from "../components/ServerStatus";
 function Register() {
   const [name,setName]=useState("");
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
   const navigate=useNavigate();
   const handleSubmit=async (e)=>{
-e.preventDefault();
-const res=await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`,{
-  method:"POST",headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({name,email,password}),
-  });
-  const data=await res.json();
-if(!res.ok){
-  setError(data.message);
-  return;
-}
-navigate("/login")
-
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try{
+      const res=await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`,{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name,email,password}),
+      });
+      const data=await res.json();
+      if(!res.ok){
+        setError(data.message);
+        return;
+      }
+      navigate("/login");
+    }catch{
+      setError("Could not reach the server. Please try again in a moment.");
+    }finally{
+      setLoading(false);
+    }
   }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -26,10 +35,11 @@ navigate("/login")
         <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
         
         {/* <p>{email}</p> */}
-        <p className="mt=1 mb-6 text-sm text-gray-500">
+        <p className="mt-1 mb-4 text-sm text-gray-500">
           Register to get started
         </p>
-        {error && <p className="mb-4 text-l text-red-600">{error}</p>}
+        <ServerStatus />
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
           <div className="mb-4">
           <label
             htmlFor="name"
@@ -82,16 +92,17 @@ navigate("/login")
 
         <button
           type="submit"
-          className="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+          disabled={loading}
+          className="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Register
+          {loading ? "Creating account..." : "Register"}
         </button>
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account? 
           <Link
             to="/login"
             className="font-medium text-blue-600 hover:underline"
-          >Register Now</Link>
+          >Login</Link>
         </p>
       </form>
     </div>
